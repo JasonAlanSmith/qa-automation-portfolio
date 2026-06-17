@@ -15,11 +15,11 @@ target: **MaelstromOps**, a multi-tenant Quality & Software-Engineering SaaS
 
 | Suite | Language | Framework | Layer | Status |
 |-------|----------|-----------|-------|--------|
-| [`pytest-api/`](./pytest-api) | Python | Pytest + httpx | API | 🚧 building |
-| `playwright-ts/` | TypeScript | Playwright | Web E2E | planned |
-| `playwright-csharp/` | C# | Playwright | Web E2E | planned |
+| [`pytest-api/`](./pytest-api) | Python | Pytest + httpx | API | ✅ complete |
+| [`playwright-ts/`](./playwright-ts) | TypeScript | Playwright | Web E2E | ✅ complete |
+| [`cypress-ts/`](./cypress-ts) | TypeScript | Cypress | Web E2E | ✅ complete |
 | `selenium-java/` | Java | Selenium + JUnit | Web E2E | planned |
-| `cypress-ts/` | TypeScript | Cypress | Web E2E | planned |
+| `playwright-csharp/` | C# | Playwright | Web E2E | planned |
 | `selenium-csharp/` | C# | Selenium + NUnit | Web E2E | planned |
 | `k6-performance/` | JavaScript | k6 | Load/Perf | planned |
 

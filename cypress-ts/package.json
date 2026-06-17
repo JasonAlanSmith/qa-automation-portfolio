@@ -1,0 +1,15 @@
+{
+  "name": "maelstromops-cypress-ts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gold-standard Cypress (TypeScript) E2E suite for MaelstromOps",
+  "scripts": {
+    "test": "cypress run",
+    "open": "cypress open",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "cypress": "^13.17.0",
+    "typescript": "^5.7.2"
+  }
+}

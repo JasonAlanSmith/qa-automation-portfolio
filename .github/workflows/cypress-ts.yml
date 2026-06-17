@@ -1,0 +1,48 @@
+name: cypress-ts
+
+on:
+  push:
+    paths: ["cypress-ts/**", ".github/workflows/cypress-ts.yml"]
+  pull_request:
+    paths: ["cypress-ts/**"]
+  workflow_dispatch:
+
+jobs:
+  # Always runs: proves the specs typecheck. Skips the Cypress binary download
+  # (CYPRESS_INSTALL_BINARY=0) so the gate stays fast and green without an app.
+  typecheck:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cypress-ts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: cypress-ts/package-lock.json
+      - run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+      - run: npm run typecheck
+
+  # Full E2E — only when a MaelstromOps app is configured (repo variable BASE_URL).
+  e2e:
+    needs: typecheck
+    if: vars.BASE_URL != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: cypress-ts
+        env:
+          BASE_URL: ${{ vars.BASE_URL }}
+          MOPS_API_BASE_URL: ${{ vars.MOPS_API_BASE_URL }}
+          MOPS_TEST_EMAIL: ${{ secrets.MOPS_TEST_EMAIL }}
+          MOPS_TEST_PASSWORD: ${{ secrets.MOPS_TEST_PASSWORD }}
