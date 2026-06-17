@@ -17,4 +17,9 @@ export class CustomersPage {
   async expectLoaded(): Promise<void> {
     await expect(this.root).toBeVisible();
   }
+
+  /** Click the first row's "View" command button — opens that customer's profile. */
+  async openFirstProfile(): Promise<void> {
+    await this.page.getByRole('button', { name: 'View' }).first().click();
+  }
 }

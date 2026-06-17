@@ -10,15 +10,18 @@ read: a technique-by-technique reference for maintainable UI automation.
 playwright-ts/
 ├─ src/
 │  ├─ config.ts            # env-driven settings — no hard-coded URLs/creds
+│  ├─ api.ts               # API helper for hybrid setup/teardown (seed via API)
+│  ├─ fixtures.ts          # custom fixtures injecting the page objects
 │  └─ pages/               # Page Object Model
 │     ├─ LoginPage.ts
 │     ├─ HomePage.ts
-│     └─ CustomersPage.ts
-│  └─ fixtures.ts          # custom fixtures injecting the page objects
+│     ├─ CustomersPage.ts
+│     └─ CustomerNewPage.ts
 ├─ tests/
 │  ├─ auth.setup.ts        # log in once → save authenticated storage state
 │  ├─ auth.spec.ts         # login UI: negative paths (runs unauthenticated)
-│  └─ smoke.spec.ts        # authenticated shell + navigation (reuses session)
+│  ├─ smoke.spec.ts        # authenticated shell + navigation (reuses session)
+│  └─ customers.spec.ts    # full customer journey: create-via-form, hybrid, grid
 ├─ playwright.config.ts    # projects: setup → chromium; trace/video on failure
 └─ package.json
 ```
@@ -36,6 +39,15 @@ playwright-ts/
 - **Custom fixtures** — page objects injected pre-built, so specs stay declarative.
 - **Web-first assertions** — `expect(locator).toBeVisible()` auto-waits; no manual
   sleeps.
+- **A real create-through-the-form journey** — fills the actual New Customer form,
+  including Syncfusion **dropdowns** (opened via their wrapper, committed with
+  keyboard ArrowDown+Enter — the list-item click doesn't reliably commit), then
+  asserts the app lands on the new record's profile.
+- **The hybrid pattern** — seed/clean test data through the **API** (fast,
+  reliable) and assert through the **UI**; data setup never drives the expensive
+  UI path.
+- **Grid interaction** — drives the data grid's "View" command to open a profile.
+- **Guaranteed cleanup** — `try/finally` deletes seeded data even on failure.
 - **Debuggability on failure** — trace on first retry, screenshot + video retained
   on failure.
 - **Config-driven environments** — point `BASE_URL` at local dev or the live demo.
@@ -65,6 +77,6 @@ MOPS_TEST_EMAIL=you@example.com MOPS_TEST_PASSWORD=••••• npm test
 > same host (e.g. `BASE_URL=http://192.168.x.x:5173`) so the cookie is sent.
 
 ## Still to layer in
-- A full **Customer CRUD journey** through the UI (create via form → see in grid →
-  edit → delete), using the hybrid pattern (seed/clean via API, assert via UI).
+- **Edit + delete through the UI** (the profile's view⇄edit toggle and delete
+  affordance) to round out the on-screen CRUD.
 - Cross-browser **projects** (firefox/webkit) and CI (GitHub Actions).
