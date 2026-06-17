@@ -1,0 +1,29 @@
+# Python
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+*.pyc
+.env
+**/reports/
+
+# Node
+**/node_modules/
+**/.cache/
+**/playwright-report/
+**/test-results/
+**/cypress/videos/
+**/cypress/screenshots/
+
+# .NET
+**/bin/
+**/obj/
+
+# Java
+**/target/
+**/.gradle/
+
+# Editors / OS
+.idea/
+.vs/
+*.user
+.DS_Store

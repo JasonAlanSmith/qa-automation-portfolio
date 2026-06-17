@@ -1,0 +1,7 @@
+pytest>=8.0
+httpx>=0.27
+jsonschema>=4.0
+python-dotenv>=1.0
+pytest-xdist>=3.5          # parallel execution (-n auto)
+pytest-html>=4.1          # self-contained HTML report
+pytest-rerunfailures>=14  # opt-in retry for genuinely flaky network cases
