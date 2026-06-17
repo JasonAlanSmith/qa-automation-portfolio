@@ -18,7 +18,7 @@ class ApiClient:
         self._client = httpx.Client(base_url=settings.base_url, timeout=timeout)
 
     # -- context-manager sugar so tests can `with ApiClient(...) as c:` ----
-    def __enter__(self) -> "ApiClient":
+    def __enter__(self) -> ApiClient:
         return self
 
     def __exit__(self, *_exc) -> None:

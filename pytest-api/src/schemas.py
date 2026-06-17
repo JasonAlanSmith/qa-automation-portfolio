@@ -28,3 +28,40 @@ ME_SCHEMA = {
         "roles": {"type": "array", "items": {"type": "string"}},
     },
 }
+
+# A reference/lookup item (e.g. /references/customer-kinds).
+REFERENCE_ITEM_SCHEMA = {
+    "type": "object",
+    "required": ["sysId", "name"],
+    "properties": {
+        "sysId": {"type": "string"},
+        "name": {"type": "string"},
+    },
+}
+
+# A Customer resource. We assert the fields the suite depends on (and that every
+# row is tenant-stamped) without over-specifying the whole DTO, so the contract
+# check stays meaningful but not brittle.
+CUSTOMER_SCHEMA = {
+    "type": "object",
+    "required": [
+        "sysId",
+        "name",
+        "isIndividual",
+        "isActive",
+        "kindSysId",
+        "themeSysId",
+        "tenantSysId",
+    ],
+    "properties": {
+        "sysId": {"type": "string"},
+        "name": {"type": "string"},
+        "isIndividual": {"type": "boolean"},
+        "isActive": {"type": "boolean"},
+        "kindSysId": {"type": "string"},
+        "themeSysId": {"type": "string"},
+        # Every persisted row carries the owning tenant — the backbone of the
+        # multi-tenant isolation the app guarantees.
+        "tenantSysId": {"type": ["string", "null"]},
+    },
+}

@@ -1,0 +1,7 @@
+line-length = 100
+target-version = "py312"
+
+[lint]
+# A sensible, well-rounded set: pycodestyle (E/W), pyflakes (F), isort (I),
+# pyupgrade (UP), and flake8-bugbear (B).
+select = ["E", "F", "I", "W", "UP", "B"]

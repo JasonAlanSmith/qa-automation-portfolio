@@ -1,0 +1,58 @@
+name: pytest-api
+
+on:
+  push:
+    paths: ["pytest-api/**", ".github/workflows/pytest-api.yml"]
+  pull_request:
+    paths: ["pytest-api/**"]
+  workflow_dispatch:
+
+jobs:
+  # Always runs: proves the suite lints clean and every test imports/collects.
+  # No live target needed, so this gate is fast and green on every push.
+  lint-and-collect:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pytest-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt ruff
+      - name: Lint (ruff)
+        run: ruff check .
+      - name: Collect tests (imports + well-formedness, no target required)
+        run: pytest --collect-only -q
+
+  # Runs the full suite only when a MaelstromOps instance is configured
+  # (repo variable MOPS_BASE_URL + credentials as secrets). Serial by design —
+  # see the README note on the API's per-IP auth rate-limit.
+  run-against-target:
+    needs: lint-and-collect
+    if: vars.MOPS_BASE_URL != ''
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pytest-api
+    env:
+      MOPS_BASE_URL: ${{ vars.MOPS_BASE_URL }}
+      MOPS_TEST_EMAIL: ${{ secrets.MOPS_TEST_EMAIL }}
+      MOPS_TEST_PASSWORD: ${{ secrets.MOPS_TEST_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run suite (serial) + HTML report
+        run: pytest -q --html=reports/report.html --self-contained-html
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-html-report
+          path: pytest-api/reports/report.html
