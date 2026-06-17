@@ -1,0 +1,38 @@
+name: k6-performance
+
+on:
+  push:
+    paths: ["k6-performance/**", ".github/workflows/k6-performance.yml"]
+  pull_request:
+    paths: ["k6-performance/**"]
+  workflow_dispatch:
+
+jobs:
+  # Always runs: validates the script parses and its options are well-formed
+  # (k6 inspect), with no running app required.
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: k6-performance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - run: k6 inspect api-read-load.js
+
+  # Full load run — only when a MaelstromOps API is configured (repo variable).
+  load:
+    needs: validate
+    if: vars.MOPS_API_BASE_URL != ''
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: k6-performance
+    env:
+      MOPS_API_BASE_URL: ${{ vars.MOPS_API_BASE_URL }}
+      MOPS_TEST_EMAIL: ${{ secrets.MOPS_TEST_EMAIL }}
+      MOPS_TEST_PASSWORD: ${{ secrets.MOPS_TEST_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - run: k6 run api-read-load.js
