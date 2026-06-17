@@ -29,10 +29,22 @@ export default defineConfig({
     // 1) Authenticate once; persist the session to disk.
     { name: 'setup', testMatch: /auth\.setup\.ts/ },
 
-    // 2) The real suite — runs authenticated by reusing the saved state.
+    // 2) The real suite — runs authenticated by reusing the saved state, across
+    //    all three engines. The saved cookies are browser-agnostic, so one login
+    //    serves every project.
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'], storageState: config.storageState },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'], storageState: config.storageState },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'], storageState: config.storageState },
       dependencies: ['setup'],
     },
   ],

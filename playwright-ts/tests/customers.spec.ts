@@ -64,4 +64,34 @@ test.describe('customer journey', () => {
     await page.waitForURL(PROFILE_URL);
     await expect(page.getByTestId('customer.profile')).toBeVisible();
   });
+
+  test('edit then delete a customer entirely through the UI', async ({
+    customerProfilePage,
+    page,
+  }) => {
+    const api = await createApiContext();
+    const customer = await seedCustomer(api, uniqueName('pw-edit'));
+    let deletedInUi = false;
+
+    try {
+      await customerProfilePage.goto(customer.sysId);
+
+      // UPDATE through the UI (View → Edit → Save).
+      const newName = uniqueName('pw-renamed');
+      await customerProfilePage.rename(newName);
+      await expect(customerProfilePage.root).toContainText(newName);
+
+      // DELETE through the UI (confirm dialog → back to the browse grid).
+      await customerProfilePage.deleteCustomer();
+      await page.waitForURL(/\/customer\/browse$/);
+      deletedInUi = true;
+
+      // It's really gone — verified independently via the API.
+      const res = await api.get(`customers/${customer.sysId}`);
+      expect(res.status()).toBe(404);
+    } finally {
+      if (!deletedInUi) await deleteCustomer(api, customer.sysId);
+      await api.dispose();
+    }
+  });
 });

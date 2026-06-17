@@ -16,7 +16,8 @@ playwright-ts/
 │     ├─ LoginPage.ts
 │     ├─ HomePage.ts
 │     ├─ CustomersPage.ts
-│     └─ CustomerNewPage.ts
+│     ├─ CustomerNewPage.ts
+│     └─ CustomerProfilePage.ts
 ├─ tests/
 │  ├─ auth.setup.ts        # log in once → save authenticated storage state
 │  ├─ auth.spec.ts         # login UI: negative paths (runs unauthenticated)
@@ -47,6 +48,11 @@ playwright-ts/
   reliable) and assert through the **UI**; data setup never drives the expensive
   UI path.
 - **Grid interaction** — drives the data grid's "View" command to open a profile.
+- **On-screen update & delete** — the profile's View⇄Edit toggle (rename + Save)
+  and Delete, including handling the native confirm **dialog**; the deletion is
+  then verified independently via the API.
+- **Cross-browser** — the suite runs on **chromium, firefox, and webkit** (one
+  saved login serves all three).
 - **Guaranteed cleanup** — `try/finally` deletes seeded data even on failure.
 - **Debuggability on failure** — trace on first retry, screenshot + video retained
   on failure.
@@ -56,12 +62,17 @@ playwright-ts/
 
 ```bash
 npm install
-npx playwright install --with-deps chromium
+npx playwright install --with-deps      # chromium + firefox + webkit
 
-npm test                 # headless run (setup → chromium)
-npm run test:headed      # watch it drive a real browser
-npm run report           # open the HTML report
+npm test                          # all three engines, headless
+npm test -- --project=chromium    # a single engine
+npm run test:headed               # watch it drive a real browser
+npm run report                    # open the HTML report
 ```
+
+CI (`.github/workflows/playwright-ts.yml`) typechecks and lists the specs on every
+push (green without an app), and runs the full cross-browser suite when a target is
+configured via the `BASE_URL` repo variable.
 
 Requires a running MaelstromOps web app. Defaults target `http://localhost:5173`
 (UI) and `http://localhost:5009/api/v1` (API). Override via env:
@@ -76,7 +87,6 @@ MOPS_TEST_EMAIL=you@example.com MOPS_TEST_PASSWORD=••••• npm test
 > a site. With a local UI that points its API at a LAN IP, drive the UI on that
 > same host (e.g. `BASE_URL=http://192.168.x.x:5173`) so the cookie is sent.
 
-## Still to layer in
-- **Edit + delete through the UI** (the profile's view⇄edit toggle and delete
-  affordance) to round out the on-screen CRUD.
-- Cross-browser **projects** (firefox/webkit) and CI (GitHub Actions).
+## Notes
+- The full E2E run needs a running MaelstromOps app. `data-testid` hooks come from
+  the app's own surface-id catalog, so selectors track the UI's stable identifiers.

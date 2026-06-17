@@ -1,0 +1,62 @@
+name: playwright-ts
+
+on:
+  push:
+    paths: ["playwright-ts/**", ".github/workflows/playwright-ts.yml"]
+  pull_request:
+    paths: ["playwright-ts/**"]
+  workflow_dispatch:
+
+jobs:
+  # Always runs: proves the suite typechecks and every spec compiles/collects.
+  # No browsers or running app needed, so this gate is fast and green on every push.
+  typecheck-and-list:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: playwright-ts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: playwright-ts/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: List tests (compiles + collects specs; no app required)
+        run: npx playwright test --list
+
+  # Full cross-browser E2E — only when a MaelstromOps app is configured
+  # (repo variable BASE_URL + credentials as secrets).
+  e2e:
+    needs: typecheck-and-list
+    if: vars.BASE_URL != ''
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: playwright-ts
+    env:
+      BASE_URL: ${{ vars.BASE_URL }}
+      MOPS_API_BASE_URL: ${{ vars.MOPS_API_BASE_URL }}
+      MOPS_TEST_EMAIL: ${{ secrets.MOPS_TEST_EMAIL }}
+      MOPS_TEST_PASSWORD: ${{ secrets.MOPS_TEST_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: playwright-ts/package-lock.json
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      - name: Run E2E (chromium + firefox + webkit)
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-ts/playwright-report/
+          retention-days: 7
