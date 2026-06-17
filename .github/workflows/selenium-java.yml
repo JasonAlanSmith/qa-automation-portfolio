@@ -1,0 +1,47 @@
+name: selenium-java
+
+on:
+  push:
+    paths: ["selenium-java/**", ".github/workflows/selenium-java.yml"]
+  pull_request:
+    paths: ["selenium-java/**"]
+  workflow_dispatch:
+
+jobs:
+  # Always runs: compiles the tests (proves the suite builds), no app/browser needed.
+  compile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: selenium-java
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - run: mvn -B -ntp test-compile
+
+  # Full E2E — only when a MaelstromOps app is configured. GitHub's ubuntu runner
+  # ships Chrome; Selenium Manager resolves the matching driver automatically.
+  e2e:
+    needs: compile
+    if: vars.BASE_URL != ''
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: selenium-java
+    env:
+      BASE_URL: ${{ vars.BASE_URL }}
+      MOPS_API_BASE_URL: ${{ vars.MOPS_API_BASE_URL }}
+      MOPS_TEST_EMAIL: ${{ secrets.MOPS_TEST_EMAIL }}
+      MOPS_TEST_PASSWORD: ${{ secrets.MOPS_TEST_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - run: mvn -B -ntp test
