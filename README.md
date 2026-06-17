@@ -21,7 +21,7 @@ target: **MaelstromOps**, a multi-tenant Quality & Software-Engineering SaaS
 | [`selenium-java/`](./selenium-java) | Java | Selenium + JUnit | Web E2E | ✅ complete |
 | [`k6-performance/`](./k6-performance) | JavaScript | k6 | Load/Perf | ✅ complete |
 | [`playwright-csharp/`](./playwright-csharp) | C# | Playwright | Web E2E | ✅ complete |
-| `selenium-csharp/` | C# | Selenium + NUnit | Web E2E | planned |
+| [`selenium-csharp/`](./selenium-csharp) | C# | Selenium + NUnit | Web E2E | ✅ complete |
 
 Each suite has its own README documenting **exactly which techniques it
 demonstrates** and how to run it.

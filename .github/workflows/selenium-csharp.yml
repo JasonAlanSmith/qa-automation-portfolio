@@ -1,0 +1,40 @@
+name: selenium-csharp
+
+on:
+  push:
+    paths: ["selenium-csharp/**", ".github/workflows/selenium-csharp.yml"]
+  pull_request:
+    paths: ["selenium-csharp/**"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: selenium-csharp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - run: dotnet build -c Release
+
+  e2e:
+    needs: build
+    if: vars.BASE_URL != ''
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: selenium-csharp
+    env:
+      BASE_URL: ${{ vars.BASE_URL }}
+      MOPS_API_BASE_URL: ${{ vars.MOPS_API_BASE_URL }}
+      MOPS_TEST_EMAIL: ${{ secrets.MOPS_TEST_EMAIL }}
+      MOPS_TEST_PASSWORD: ${{ secrets.MOPS_TEST_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - run: dotnet test -c Release
